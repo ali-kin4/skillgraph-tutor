@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from .compat import BaseModel, Field
 
 try:
     import tomllib
@@ -29,6 +29,7 @@ class SpacedRepetitionConfig(BaseModel):
 class PolicyConfig(BaseModel):
     review_mastery_threshold: float = 0.6
     new_concept_mastery_cap: float = 0.75
+    mastery_learning_rate: float = 0.18
 
 
 class LoggingConfig(BaseModel):

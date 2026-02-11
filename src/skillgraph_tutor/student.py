@@ -31,6 +31,7 @@ class StudentState:
     student_id: str
     name: str
     forgetting_lambda: float = 0.02
+    mastery_learning_rate: float = 0.18
     concepts: dict[str, ConceptState] = field(default_factory=dict)
 
     def concept(self, name: str) -> ConceptState:
@@ -55,7 +56,7 @@ class StudentState:
         self.apply_forgetting(concept, now=now)
         c = self.concept(concept)
         signal = (1.0 if correct else -1.0) * max(0.0, min(1.0, confidence))
-        c.mastery = float(max(0.0, min(1.0, c.mastery + 0.18 * signal)))
+        c.mastery = float(max(0.0, min(1.0, c.mastery + self.mastery_learning_rate * signal)))
         c.updated_at = now.isoformat()
         return c.mastery
 
@@ -64,6 +65,7 @@ class StudentState:
             "student_id": self.student_id,
             "name": self.name,
             "forgetting_lambda": self.forgetting_lambda,
+            "mastery_learning_rate": self.mastery_learning_rate,
             "concepts": {
                 name: {
                     "mastery": state.mastery,
@@ -76,18 +78,20 @@ class StudentState:
 
     @classmethod
     def from_dict(cls, data: dict) -> StudentState:
+        default_state = ConceptState()
         concepts: dict[str, ConceptState] = {}
         for name, raw in data.get("concepts", {}).items():
             reviews = ReviewState(**raw.get("reviews", {}))
             concepts[name] = ConceptState(
-                mastery=raw.get("mastery", 0.2),
-                updated_at=raw.get("updated_at", utc_now().isoformat()),
+                mastery=raw.get("mastery", default_state.mastery),
+                updated_at=raw.get("updated_at", default_state.updated_at),
                 reviews=reviews,
             )
         return cls(
             student_id=data["student_id"],
             name=data["name"],
-            forgetting_lambda=data.get("forgetting_lambda", 0.02),
+            forgetting_lambda=data.get("forgetting_lambda", cls.forgetting_lambda),
+            mastery_learning_rate=data.get("mastery_learning_rate", cls.mastery_learning_rate),
             concepts=concepts,
         )
 

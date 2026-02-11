@@ -1,7 +1,7 @@
 .PHONY: setup test lint fmt demo
 
 setup:
-	python -m pip install -e . --no-build-isolation || true
+	python -m pip install -e . --no-build-isolation
 
 fmt:
 	PYTHONPATH=src ruff format .

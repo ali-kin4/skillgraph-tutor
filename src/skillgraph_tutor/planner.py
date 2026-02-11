@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
@@ -58,11 +59,14 @@ def next_action(
 
 def seven_day_plan(graph: ConceptGraph, student: StudentState) -> list[PlannedAction]:
     actions: list[PlannedAction] = []
+    simulated_student = copy.deepcopy(student)
     simulated_now = datetime.now(timezone.utc)
-    for _ in range(7):
-        action = next_action(graph, student)
+    for day in range(7):
+        action = next_action(graph, simulated_student)
         actions.append(action)
-        if action.concept not in student.concepts:
-            student.concept(action.concept).mastery = 0.3
-        student.apply_forgetting(action.concept, now=simulated_now + timedelta(days=1))
+        if action.concept not in simulated_student.concepts:
+            simulated_student.concept(action.concept).mastery = 0.3
+        simulated_student.apply_forgetting(
+            action.concept, now=simulated_now + timedelta(days=day + 1)
+        )
     return actions

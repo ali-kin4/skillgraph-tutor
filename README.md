@@ -1,7 +1,7 @@
 # SkillGraph Tutor
 
-![CI](https://github.com/your-org/skillgraph-tutor/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![CI](https://img.shields.io/badge/CI-GitHub_Actions-informational)
 
 An **offline-first agentic tutoring engine** for tutors, learners, and edtech builders. It builds a concept graph from a syllabus, tracks student mastery with forgetting, plans review using spaced repetition, teaches in Socratic style, and emits progress reports + eval metrics.
 

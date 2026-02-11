@@ -3,8 +3,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-import typer
-
+from .compat import typer
 from .config import SkillGraphConfig
 from .eval_harness import write_evaluation
 from .graph import load_graph, parse_syllabus_markdown
@@ -48,7 +47,10 @@ def add_student(
 ) -> None:
     cfg = SkillGraphConfig.load(config_path)
     student = StudentState(
-        student_id=student_id, name=name, forgetting_lambda=cfg.forgetting.lambda_default
+        student_id=student_id,
+        name=name,
+        forgetting_lambda=cfg.forgetting.lambda_default,
+        mastery_learning_rate=cfg.policy.mastery_learning_rate,
     )
     save_student(_student_path(cfg, student_id), student)
     typer.echo(f"Added student {student_id}.")
@@ -79,7 +81,7 @@ def quiz(
     before = student.concept(concept).mastery
     after = student.update_mastery(concept, correct=correct, confidence=confidence)
     quality = 4 if correct else 2
-    sm2_update(student.concept(concept), quality=quality)
+    sm2_update(student.concept(concept), quality=quality, config=cfg.spaced_repetition)
     save_student(_student_path(cfg, student_id), student)
     log_trace(
         cfg.logging.trace_path,
@@ -106,7 +108,7 @@ def review(student_id: str, config_path: str | None = None) -> None:
         typer.echo("No due reviews.")
         return
     for concept in queue:
-        sm2_update(student.concept(concept), quality=4)
+        sm2_update(student.concept(concept), quality=4, config=cfg.spaced_repetition)
         typer.echo(f"Reviewed {concept}")
     save_student(_student_path(cfg, student_id), student)
 
@@ -136,10 +138,22 @@ def report(
 
 
 @app.command("doctor")
-def doctor() -> None:
+def doctor(config_path: str | None = typer.Option(None, "--config")) -> None:
+    cfg = SkillGraphConfig.load(config_path)
+    ws_path = Path(cfg.data_dir)
+    workspace_writable = False
+    try:
+        ws_path.mkdir(exist_ok=True, parents=True)
+        check_file = ws_path / ".writable_check"
+        check_file.write_text("ok", encoding="utf-8")
+        check_file.unlink()
+        workspace_writable = True
+    except OSError:
+        workspace_writable = False
+
     checks = {
         "python": True,
-        "workspace_writable": Path(".").exists(),
+        "workspace_writable": workspace_writable,
         "sample_data": Path("data/sample_syllabus.md").exists(),
     }
     for name, ok in checks.items():

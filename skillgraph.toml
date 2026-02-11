@@ -17,6 +17,7 @@ start_ease = 2.5
 [policy]
 review_mastery_threshold = 0.6
 new_concept_mastery_cap = 0.75
+mastery_learning_rate = 0.18
 
 [logging]
 trace_path = "artifacts/traces.jsonl"

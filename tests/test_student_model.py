@@ -12,3 +12,10 @@ def test_forgetting_and_update():
     assert decayed < 0.8
     updated = s.update_mastery("A", correct=True, confidence=1.0, now=now)
     assert updated >= decayed
+
+
+def test_from_dict_uses_dataclass_defaults_when_fields_missing():
+    student = StudentState.from_dict({"student_id": "s1", "name": "Ada", "concepts": {"A": {}}})
+    assert student.forgetting_lambda == StudentState.forgetting_lambda
+    assert student.mastery_learning_rate == StudentState.mastery_learning_rate
+    assert student.concepts["A"].mastery == 0.2

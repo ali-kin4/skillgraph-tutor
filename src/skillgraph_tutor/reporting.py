@@ -5,11 +5,12 @@ from pathlib import Path
 
 from .graph import ConceptGraph
 from .planner import seven_day_plan
+from .scheduler import is_due
 from .student import StudentState
 
 
 def render_report(student: StudentState, graph: ConceptGraph) -> tuple[str, dict]:
-    due = [name for name, concept in student.concepts.items() if concept.reviews.due_at is None]
+    due = [name for name, concept in student.concepts.items() if is_due(concept)]
     plan = seven_day_plan(graph, student)
     plan_rows = [
         {"day": i + 1, "action": item.action, "concept": item.concept}

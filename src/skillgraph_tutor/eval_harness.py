@@ -1,17 +1,27 @@
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 
 from .planner import next_action
+from .student import StudentState
 from .tutors import DirectAnswerTutor, SocraticTutor
 
 
+def _simulate_pre_post_gain(student: StudentState, concept: str) -> float:
+    sim = copy.deepcopy(student)
+    pre = sim.concept(concept).mastery
+    post = sim.update_mastery(concept, correct=True, confidence=0.9)
+    return round(post - pre, 4)
+
+
 def evaluate(graph, student) -> dict:
+    primary_concept = sorted(graph.nodes.keys())[0]
     socratic = SocraticTutor()
     baseline = DirectAnswerTutor()
-    turn = socratic.teach(next(iter(graph.nodes.keys())), response="")
-    baseline_text = baseline.teach(next(iter(graph.nodes.keys())))
+    turn = socratic.teach(primary_concept, response="")
+    baseline_text = baseline.teach(primary_concept)
     action = next_action(graph, student)
 
     metrics = {
@@ -22,7 +32,7 @@ def evaluate(graph, student) -> dict:
             action.reason in {"due_or_low_mastery", "prerequisites_satisfied"}
         ),
         "baseline_answer_length": len(baseline_text),
-        "simulated_pre_post_gain": 0.2,
+        "simulated_pre_post_gain": _simulate_pre_post_gain(student, primary_concept),
     }
     return metrics
 

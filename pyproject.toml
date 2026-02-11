@@ -9,7 +9,7 @@ description = "Offline-first agentic tutoring engine with concept graphs, master
 readme = "README.md"
 authors = [{name = "SkillGraph Tutor Contributors"}]
 license = {file = "LICENSE"}
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
   "typer>=0.12.0",
   "pydantic>=2.6.0",
@@ -33,10 +33,11 @@ where = ["src"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+ignore = ["UP017"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
