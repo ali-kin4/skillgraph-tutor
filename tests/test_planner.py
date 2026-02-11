@@ -17,3 +17,14 @@ def test_seven_day_plan_no_mutation_side_effect():
     plan = seven_day_plan(g, s)
     assert len(plan) == 7
     assert s.to_dict() == before
+
+
+def test_next_action_fallback_is_deterministic():
+    g = parse_syllabus_markdown("## B\n## A")
+    s = StudentState(student_id="s1", name="Ada")
+    for name in ["B", "A"]:
+        concept = s.concept(name)
+        concept.mastery = 1.0
+        concept.reviews.due_at = "2999-01-01T00:00:00+00:00"
+    action = next_action(g, s)
+    assert action.concept == "A"

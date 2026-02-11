@@ -32,6 +32,29 @@ def _graph_path(config: SkillGraphConfig) -> Path:
     return _workspace(config) / "graph.json"
 
 
+def _fail(message: str) -> None:
+    typer.echo(f"Error: {message}")
+    raise SystemExit(1)
+
+
+def _require_student(config: SkillGraphConfig, student_id: str) -> StudentState:
+    path = _student_path(config, student_id)
+    try:
+        return load_student(path)
+    except FileNotFoundError:
+        _fail(
+            f"Student with ID '{student_id}' not found. Run 'skillgraph add-student {student_id}'."
+        )
+
+
+def _require_graph(config: SkillGraphConfig):
+    path = _graph_path(config)
+    try:
+        return load_graph(path)
+    except FileNotFoundError:
+        _fail("Concept graph not initialized. Run 'skillgraph init <syllabus.md>' first.")
+
+
 @app.command("init")
 def init_cmd(syllabus: str, config_path: str | None = typer.Option(None, "--config")) -> None:
     cfg = SkillGraphConfig.load(config_path)
@@ -59,7 +82,7 @@ def add_student(
 @app.command("study")
 def study(student_id: str, concept: str, config_path: str | None = None) -> None:
     cfg = SkillGraphConfig.load(config_path)
-    student = load_student(_student_path(cfg, student_id))
+    student = _require_student(cfg, student_id)
     tutor = SocraticTutor()
     turn = tutor.teach(concept, response="")
     student.concept(concept)
@@ -77,7 +100,7 @@ def quiz(
     config_path: str | None = None,
 ) -> None:
     cfg = SkillGraphConfig.load(config_path)
-    student = load_student(_student_path(cfg, student_id))
+    student = _require_student(cfg, student_id)
     before = student.concept(concept).mastery
     after = student.update_mastery(concept, correct=correct, confidence=confidence)
     quality = 4 if correct else 2
@@ -102,7 +125,7 @@ def quiz(
 @app.command("review")
 def review(student_id: str, config_path: str | None = None) -> None:
     cfg = SkillGraphConfig.load(config_path)
-    student = load_student(_student_path(cfg, student_id))
+    student = _require_student(cfg, student_id)
     queue = build_review_queue(student, low_mastery_threshold=cfg.policy.review_mastery_threshold)
     if not queue:
         typer.echo("No due reviews.")
@@ -118,8 +141,8 @@ def plan(
     student_id: str, horizon: str = typer.Option("7d", "--horizon"), config_path: str | None = None
 ) -> None:
     cfg = SkillGraphConfig.load(config_path)
-    graph = load_graph(_graph_path(cfg))
-    student = load_student(_student_path(cfg, student_id))
+    graph = _require_graph(cfg)
+    student = _require_student(cfg, student_id)
     actions = seven_day_plan(graph, student) if horizon == "7d" else [next_action(graph, student)]
     for item in actions:
         typer.echo(f"{item.action}: {item.concept} ({item.reason})")
@@ -130,8 +153,8 @@ def report(
     student_id: str, out: str = typer.Option(..., "--out"), config_path: str | None = None
 ) -> None:
     cfg = SkillGraphConfig.load(config_path)
-    graph = load_graph(_graph_path(cfg))
-    student = load_student(_student_path(cfg, student_id))
+    graph = _require_graph(cfg)
+    student = _require_student(cfg, student_id)
     write_report(out, student, graph)
     write_evaluation(out, graph, student)
     typer.echo(f"Report written to {out}")

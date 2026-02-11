@@ -53,7 +53,7 @@ def next_action(
     if eligible:
         return PlannedAction(action="learn", concept=eligible[0], reason="prerequisites_satisfied")
 
-    fallback = next(iter(graph.nodes.keys()))
+    fallback = sorted(graph.nodes.keys())[0]
     return PlannedAction(action="review", concept=fallback, reason="no_eligible_new_concepts")
 
 
