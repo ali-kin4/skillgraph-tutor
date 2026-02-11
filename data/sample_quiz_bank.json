@@ -1,0 +1,12 @@
+{
+  "Variables": [
+    "What is the difference between a variable name and value?",
+    "Predict output: x=2; y=x+1"
+  ],
+  "Control Flow": [
+    "When do you choose if/elif/else over match?"
+  ],
+  "Functions": [
+    "Why are function parameters useful?"
+  ]
+}
