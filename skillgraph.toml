@@ -1,0 +1,22 @@
+seed = 42
+data_dir = "workspace"
+
+[models]
+provider = "mock"
+model_name = "mock-socratic-v1"
+
+[forgetting]
+lambda_default = 0.02
+
+[spaced_repetition]
+initial_interval_days = 1
+easy_bonus = 1.3
+min_ease = 1.3
+start_ease = 2.5
+
+[policy]
+review_mastery_threshold = 0.6
+new_concept_mastery_cap = 0.75
+
+[logging]
+trace_path = "artifacts/traces.jsonl"
