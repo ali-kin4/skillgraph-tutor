@@ -1,0 +1,31 @@
+name: Feature request
+description: Propose a capability for the engine, CLI or dashboard.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which teaching or learning question can you not answer today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behaviour, including how any new metric is computed and how missing data is treated.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Project principles
+      options:
+        - label: Works fully offline by default (no required network calls or API keys).
+          required: true
+        - label: Any new metric is explainable and documented on the Methodology page.
+          required: true

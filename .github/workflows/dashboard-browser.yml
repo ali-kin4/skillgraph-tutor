@@ -1,9 +1,14 @@
 name: SkillGraph browser validation
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 permissions:
   contents: read
+concurrency:
+  group: browser-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   browser:
     runs-on: ubuntu-latest

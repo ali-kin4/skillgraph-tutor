@@ -2,25 +2,101 @@ name: ci
 
 on:
   push:
+    branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - name: Install
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .[dev]
+          python-version: "3.12"
+      - run: python -m pip install "ruff>=0.5.0"
       - name: Ruff check
-        run: ruff check .
+        run: ruff check . --output-format=github
       - name: Ruff format check
         run: ruff format --check .
-      - name: Pytest
-        run: pytest -q
-      - name: Demo
-        run: make demo
+      - name: JavaScript syntax
+        run: |
+          for file in src/skillgraph_tutor/web/*.js tests/*.mjs; do node --check "$file"; done
+
+  test:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.11", "3.12", "3.13"]
+        exclude:
+          - os: macos-latest
+            python-version: "3.12"
+          - os: windows-latest
+            python-version: "3.12"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Pytest with coverage
+        run: pytest -q --cov --cov-report=term --cov-report=xml
+      - name: CLI demo
+        shell: bash
+        run: python -m skillgraph_tutor.cli demo
+      - name: Upload coverage report
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+
+  package:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install build
+          python -m build
+      - name: Verify wheel bundles dashboard assets
+        run: |
+          python - <<'EOF'
+          import glob, zipfile
+          names = set(zipfile.ZipFile(glob.glob("dist/*.whl")[0]).namelist())
+          required = {
+              "skillgraph_tutor/web/index.html",
+              "skillgraph_tutor/web/app.js",
+              "skillgraph_tutor/web/insights.js",
+              "skillgraph_tutor/web/styles.css",
+              "skillgraph_tutor/demo_syllabus.md",
+              "skillgraph_tutor/py.typed",
+          }
+          missing = required - names
+          assert not missing, f"wheel is missing {sorted(missing)}"
+          print("wheel contents verified")
+          EOF
+      - name: Smoke-test installed wheel
+        run: |
+          python -m venv /tmp/wheel-env
+          /tmp/wheel-env/bin/pip install dist/*.whl
+          cd /tmp && /tmp/wheel-env/bin/skillgraph --help
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
