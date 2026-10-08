@@ -16,6 +16,8 @@ async function main(){
   await page.locator(".kpi").first().waitFor({timeout:20000});
   assert(await page.locator(".kpi").count()===4,"Missing dashboard metric cards");
   assert(await page.locator("#kpiGrid").innerText().then(t=>t.includes("16")),"Demo cohort did not load");
+  const barWidth=await page.locator(".mastery-bars .bar-fill").first().evaluate(el=>el.getBoundingClientRect().width);
+  assert(barWidth>20,"Expected colored mastery bars to have visible width; got "+barWidth);
   await page.screenshot({path:screenshots+"/01-overview-desktop.png",fullPage:true});
   await page.locator('[data-view="learners"]').click();
   await page.locator("#learnerRows tr").first().waitFor();
@@ -62,7 +64,10 @@ async function main(){
   await page.locator(".kpi").first().waitFor();
   await page.waitForTimeout(350);
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1);
-  assert(!overflow,"Mobile dashboard has horizontal overflow");
+  if(overflow) {
+    const offenders=await page.evaluate(()=>Array.from(document.querySelectorAll("body *")).filter(el=>el.getBoundingClientRect().right>window.innerWidth+1 && getComputedStyle(el).display!=="none").slice(0,14).map(el=>({tag:el.tagName,id:el.id,cls:el.className?.baseVal||el.className,right:Math.round(el.getBoundingClientRect().right)})));
+    throw new Error("Mobile dashboard has horizontal overflow: "+JSON.stringify(offenders));
+  }
   await page.screenshot({path:screenshots+"/07-mobile-overview.png",fullPage:true});
   await page.locator("#menuButton").click();
   await page.locator("#sidebar.open").waitFor();
