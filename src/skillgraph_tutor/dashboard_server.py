@@ -185,7 +185,7 @@ def make_handler(workspace: Path):
                         "hint": turn.hint,
                         "check": turn.check,
                         "microActions": turn.micro_actions,
-                        "disclosure": "Deterministic Socratic prompt templates; no LLM or AI grading.",
+                        "disclosure": "Deterministic Socratic templates; no LLM or AI grading.",
                     },
                 )
                 return
