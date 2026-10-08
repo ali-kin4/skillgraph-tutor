@@ -19,6 +19,25 @@ async function main(){
   const barWidth=await page.locator(".mastery-bars .bar-fill").first().evaluate(el=>el.getBoundingClientRect().width);
   assert(barWidth>20,"Expected colored mastery bars to have visible width; got "+barWidth);
   await page.screenshot({path:screenshots+"/01-overview-desktop.png",fullPage:true});
+  await page.locator('[data-view="insights"]').click();
+  await page.locator("#trajectory svg").waitFor();
+  assert(await page.locator(".hm-cell").count()===16*9,"Heat map should show 16 learners x 9 concepts");
+  assert(await page.locator("#skillBars .skill-bar").count()===9,"Expected nine skill average bars");
+  assert(await page.locator("#insightList .insight-item").count()>=3,"Expected rule-based insights");
+  assert(page.url().endsWith("#insights"),"View should be deep-linkable");
+  await page.locator("#insightScope").selectOption("group:Engineering");
+  await page.waitForFunction(()=>document.querySelectorAll(".hm-cell").length===5*9);
+  await page.locator('#insightHorizon [data-weeks="12"]').click();
+  await page.waitForFunction(()=>document.querySelectorAll("#trajectoryTable tbody tr").length===13+12);
+  await page.locator("#insightList .insight-concept").first().click();
+  assert(await page.locator(".skill-bar.is-focus").count()===1,"Insight concept did not focus the charts");
+  await page.locator(".hm-cell").first().hover();
+  assert(await page.locator("#chartTip").isVisible(),"Heat map tooltip missing");
+  await page.locator(".hm-cell").first().click();
+  await page.locator("#learnerDetail:not([hidden])").waitFor();
+  await page.goto(origin+"/#insights",{waitUntil:"domcontentloaded"});
+  await page.locator("#trajectory svg").waitFor();
+  await page.screenshot({path:screenshots+"/01b-insights-desktop.png",fullPage:true});
   await page.locator('[data-view="learners"]').click();
   await page.locator("#learnerRows tr").first().waitFor();
   assert(await page.locator("#learnerRows tr").count()===16,"Expected sixteen fictional learners");
@@ -60,15 +79,17 @@ async function main(){
   assert(download.suggestedFilename().endsWith(".csv"),"CSV export failed");
   await page.screenshot({path:screenshots+"/06-cohort-reports.png",fullPage:true});
   await page.setViewportSize({width:390,height:844});
-  await page.reload({waitUntil:"domcontentloaded"});
-  await page.locator(".kpi").first().waitFor();
-  await page.waitForTimeout(350);
-  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1);
-  if(overflow) {
-    const offenders=await page.evaluate(()=>Array.from(document.querySelectorAll("body *")).filter(el=>el.getBoundingClientRect().right>window.innerWidth+1 && getComputedStyle(el).display!=="none").slice(0,14).map(el=>({tag:el.tagName,id:el.id,cls:el.className?.baseVal||el.className,right:Math.round(el.getBoundingClientRect().right)})));
-    throw new Error("Mobile dashboard has horizontal overflow: "+JSON.stringify(offenders));
+  for (const view of ["overview","insights"]) {
+    await page.goto(origin+"/#"+view,{waitUntil:"domcontentloaded"});
+    await page.locator(view==="overview"?".kpi":"#trajectory svg").first().waitFor();
+    await page.waitForTimeout(350);
+    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1);
+    if(overflow) {
+      const offenders=await page.evaluate(()=>Array.from(document.querySelectorAll("body *")).filter(el=>el.getBoundingClientRect().right>window.innerWidth+1 && getComputedStyle(el).display!=="none" && !el.closest(".heatmap-scroll,.table-scroll")).slice(0,14).map(el=>({tag:el.tagName,id:el.id,cls:el.className?.baseVal||el.className,right:Math.round(el.getBoundingClientRect().right)})));
+      if(offenders.length)throw new Error("Mobile "+view+" has horizontal overflow: "+JSON.stringify(offenders));
+    }
+    await page.screenshot({path:screenshots+"/07-mobile-"+view+".png",fullPage:true});
   }
-  await page.screenshot({path:screenshots+"/07-mobile-overview.png",fullPage:true});
   await page.locator("#menuButton").click();
   await page.locator("#sidebar.open").waitFor();
   await page.locator('[data-view="learners"]').click();
@@ -76,7 +97,7 @@ async function main(){
   assert(await page.locator("#drawerShade").isHidden(),"Mobile drawer backdrop remained open");
   await page.screenshot({path:screenshots+"/08-mobile-learners.png",fullPage:true});
   assert(errors.length===0,"Browser exceptions: "+errors.join("; "));
-  console.log("PASS browser: overview, search, learner details, graph, reviews, coaching, assessment, CSV and mobile");
+  console.log("PASS browser: overview, insights, search, learner details, graph, reviews, coaching, assessment, CSV and mobile");
 }
 try {await main();}
 catch(err){console.error("FAIL browser:",err.stack || err);if(browser){const pages=browser.contexts().flatMap(ctx=>ctx.pages());if(pages[0])await pages[0].screenshot({path:screenshots+"/failure.png",fullPage:true}).catch(()=>{});}process.exitCode=1;}

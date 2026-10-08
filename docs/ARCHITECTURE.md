@@ -22,6 +22,7 @@
 | --- | --- | --- |
 | GET | /api/dashboard | Full cohort snapshot and methodology |
 | GET | /api/student?id=... | One learner's dashboard state |
+| GET | /api/insights?scope=...&weeks=... | Weekly mastery history, two scenario projections, 4-week concept growth and rule-based insights. `scope` is `cohort`, `group:<name>` or `learner:<id>`; `weeks` is 1–26 |
 | GET | /api/export.csv | Per-learner, per-concept CSV with safe spreadsheet cells |
 | GET | /api/export.json | Full JSON snapshot |
 | POST | /api/tutor | Offline deterministic Socratic question/hint/next step |
@@ -39,6 +40,19 @@
 ~~~
 
 The API does not accept free-form masteries: only observations are recorded. The original engine computes the new state and SM-2 interval.
+
+## Growth history and scenario projections
+
+`StudentState.update_mastery` appends a `(timestamp, mastery)` point to the concept's `history` (bounded to the latest 120 points). Older learner files without `history` load unchanged; for them the last recorded `updated_at`/`mastery` pair is the only point.
+
+`insights.py` holds pure functions over these states:
+
+- **History:** for each of the last 12 weeks, the mean of every learner-concept pair's most recent recorded estimate at that instant. Pairs not yet observed are excluded and the per-week observation count is returned, so new concepts entering the curriculum are visible rather than silently imputed. The final point equals the dashboard snapshot mean.
+- **Scenario projections:** starting from each current estimate, *with practice* applies one successful review per week at confidence 0.7 through the learner's own learning rate and forgetting rate; *without practice* applies only exponential forgetting. Both are what the heuristic model implies under a stated assumption, not forecasts.
+- **Concept growth:** mean change over 28 days among learners observed at both ends.
+- **Insights:** fixed rules (fastest-growing skills, lowest-mastery concept and its weakest prerequisite, scenario gap, due reviews). Each insight lists the concepts it names so the UI can link them to the charts.
+
+The Insights view renders these with dependency-free SVG/HTML: a learner × concept heat map on a single-hue sequential scale with five labelled bands and hatched "not observed" cells, skill averages with 4-week change, and the trajectory chart with a keyboard-accessible crosshair and a data-table fallback.
 
 ## Graph visualization
 

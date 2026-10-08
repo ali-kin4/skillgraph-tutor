@@ -17,7 +17,7 @@ from .graph import ConceptGraph, load_graph
 from .student import StudentState, load_student
 
 
-def _as_utc(raw: str | None) -> datetime | None:
+def parse_utc(raw: str | None) -> datetime | None:
     if not raw:
         return None
     try:
@@ -29,7 +29,7 @@ def _as_utc(raw: str | None) -> datetime | None:
         return None
 
 
-def _mean(values: list[float]) -> float | None:
+def mean_or_none(values: list[float]) -> float | None:
     return round(sum(values) / len(values), 4) if values else None
 
 
@@ -72,7 +72,7 @@ def _student_details(graph: ConceptGraph, student: StudentState, now: datetime, 
             )
             continue
         value = float(max(0.0, min(1.0, concept.mastery)))
-        deadline = _as_utc(concept.reviews.due_at)
+        deadline = parse_utc(concept.reviews.due_at)
         is_due = deadline is not None and deadline <= now
         if is_due:
             due.append(name)
@@ -115,7 +115,7 @@ def _student_details(graph: ConceptGraph, student: StudentState, now: datetime, 
         "id": student.student_id,
         "name": student.name,
         "group": group,
-        "meanMastery": _mean(values),
+        "meanMastery": mean_or_none(values),
         "observed": len(values),
         "totalConcepts": len(names),
         "coverage": round(len(values) / len(names), 4) if names else 0,
@@ -163,7 +163,7 @@ def dashboard_snapshot(
             {
                 "name": name,
                 "requires": sorted(graph.nodes[name].requires),
-                "mean": _mean(seen),
+                "mean": mean_or_none(seen),
                 "observed": len(seen),
                 "unobserved": len(rows) - len(seen),
                 "weak": weak,
@@ -187,7 +187,7 @@ def dashboard_snapshot(
             {
                 "name": group,
                 "learners": len(subset),
-                "meanMastery": _mean(group_values),
+                "meanMastery": mean_or_none(group_values),
                 "dueReviews": sum(row["dueCount"] for row in subset),
                 "needsSupport": sum(row["support"] == "Needs support" for row in subset),
             }
@@ -207,12 +207,19 @@ def dashboard_snapshot(
             "Monitor: any due review or 2+ observed masteries < 0.60; "
             "otherwise On track. Unassessed when there are no observations.",
             "missing": "Unattempted concepts are missing and omitted from mastery averages.",
+            "trajectory": "History is the weekly mean of each learner-concept pair's latest "
+            "recorded estimate. Projections replay each learner's learning and forgetting "
+            "rates: one successful review per concept per week at confidence 0.7, or no "
+            "practice. They are model scenarios, not predictions.",
+            "insights": "Deterministic rules over recorded data: fastest 4-week growth, "
+            "lowest-mastery concept and its weakest prerequisite, scenario gap and due "
+            "reviews. No AI model generates them.",
             "demo": "All sample learners and outcomes are synthetic demonstrations.",
         },
         "metrics": {
             "learners": len(rows),
             "concepts": len(names),
-            "meanMastery": _mean(observed),
+            "meanMastery": mean_or_none(observed),
             "observations": len(observed),
             "possibleObservations": len(rows) * len(names),
             "dueReviews": due,

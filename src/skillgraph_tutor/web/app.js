@@ -1,4 +1,5 @@
 /* SkillGraph Insights — dependency-free frontend. No external API calls or telemetry. */
+import { fillInsightScopes, initInsights, loadInsights } from "./insights.js";
 
 let snapshot = null;
 let activeView = "overview";
@@ -56,10 +57,12 @@ function switchView(view) {
     if(active)button.setAttribute("aria-current","page");
     else button.removeAttribute("aria-current");
   });
-  const labels={overview:"Overview",learners:"Learners",map:"Knowledge graph",
+  const labels={overview:"Overview",insights:"Insights",learners:"Learners",map:"Knowledge graph",
     reviews:"Review center",reports:"Cohort reports",coach:"Socratic practice",method:"Methodology"};
   $("#breadcrumb").textContent=labels[view] || "Overview";
+  if(location.hash!=="#"+view)history.replaceState(null,"","#"+view);
   closeDrawer();
+  if(view==="insights")loadInsights();
   if(view==="learners")renderLearners();
   if(view==="map")renderGraph();
   if(view==="reviews")renderReviews();
@@ -323,6 +326,8 @@ function renderMethodology() {
     ["◷","Scheduled reviews",d.due],
     ["✧","Support indicators",d.support],
     ["◇","Missing observations",d.missing],
+    ["↗","Growth and projections",d.trajectory],
+    ["✦","Insights",d.insights],
     ["✳","Demo and privacy",snapshot.sample?d.demo:"This is local learner workspace data. No server-side identity verification or user authentication is provided."],
     ["⌘","Socratic practice","The local prompt generator produces deterministic questions, hints, and micro-actions. It is not an LLM, and does not automatically grade answers."],
     ["▥","Reporting integrity","No inferred attendance, demographic scoring, learning gain, predictions, or independently validated assessment claims."]
@@ -393,7 +398,9 @@ async function reloadSnapshot(){
   renderLearners();
   renderReviews();
   renderReports();
+  fillInsightScopes(snapshot);
   if(activeView==="map")renderGraph();
+  if(activeView==="insights")loadInsights();
 }
 function saveExport(type) {
   const link=document.createElement("a");
@@ -448,17 +455,20 @@ function bindEvents() {
   });
   $("#drawerShade").addEventListener("click",closeDrawer);
   window.addEventListener("keydown",event=>{if(event.key==="Escape")closeDrawer();});
+  window.addEventListener("hashchange",()=>{const view=location.hash.slice(1);if(view&&view!==activeView)switchView(view);});
 }
 async function main(){
   $("#year").textContent=String(new Date().getFullYear());
   bindEvents();
+  initInsights({$, $$, esc, requestJson, snapshot:()=>snapshot});
   try {
     snapshot=await requestJson("/api/dashboard");
     fillChoices();
+    fillInsightScopes(snapshot);
     renderOverview();renderLearners();renderReviews();renderReports();renderMethodology();
     if(snapshot.concepts.length)selectedGraphConcept=snapshot.concepts[0].name;
     renderGraph();
-    switchView("overview");
+    switchView(location.hash.slice(1) || "overview");
     if(snapshot.sample)notice("Showing clearly labeled synthetic demonstration data.");
   } catch(err){showError("Dashboard could not load: "+err.message+" Check that your workspace is initialized.");}
 }

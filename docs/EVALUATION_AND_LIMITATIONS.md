@@ -13,6 +13,9 @@ SkillGraph is a teaching/analytics *demonstration*. Its built-in synthetic cohor
 | Support label | Explicitly documented screening rules | Likelihood of dropout or course failure |
 | Socratic prompt | Deterministic scaffold generated from a concept | Personalized LLM feedback or independent grading |
 | 7-day plan | Heuristic plan produced by current planner | Optimized or validated intervention sequence |
+| Growth trajectory | Weekly mean of the latest recorded estimates per learner-concept pair | Standardized growth or scale-score gains |
+| Scenario projection | Model output under a stated practice assumption | Forecast of what learners will achieve |
+| Insight | Deterministic rule over observed data | AI-generated or causal finding |
 
 ## Calculation audit
 

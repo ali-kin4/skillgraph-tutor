@@ -1,142 +1,175 @@
-# SkillGraph Insights
+<div align="center">
 
-**An offline-first intelligent learning and assessment platform.**
+# SkillGraph
 
-SkillGraph combines a Python mastery/review engine with a local visual dashboard for instructors, technical trainers, and learners. It helps answer practical teaching questions: *Which concepts have been observed? Who has practice due? Where are the knowledge gaps? What should we do next?*
+**Offline-first tutoring engine and learning-analytics dashboard.**
+Concept graphs, mastery tracking, spaced repetition, and explainable cohort insights, all on your own machine.
 
-The core engine remains available through its original CLI. The Insights dashboard adds a **cohort overview, learner profiles, interactive prerequisite graph, review center, cohort reporting, and guided practice**.
+[![CI](https://github.com/ali-kin4/skillgraph-tutor/actions/workflows/ci.yml/badge.svg)](https://github.com/ali-kin4/skillgraph-tutor/actions/workflows/ci.yml)
+[![Browser tests](https://github.com/ali-kin4/skillgraph-tutor/actions/workflows/dashboard-browser.yml/badge.svg)](https://github.com/ali-kin4/skillgraph-tutor/actions/workflows/dashboard-browser.yml)
+![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-3b5bdb)
+[![License](https://img.shields.io/badge/license-Apache--2.0-0f9f8f)](LICENSE)
+![Offline](https://img.shields.io/badge/runs-100%25%20offline-9b5de5)
 
-Created by [Ali Jabbary](https://alijabbary.com) · [GitHub](https://github.com/ali-kin4/skillgraph-tutor)
+[Quick start](#quick-start) · [Features](#features) · [How the numbers work](#how-the-numbers-work) · [Architecture](docs/ARCHITECTURE.md) · [Limitations](docs/EVALUATION_AND_LIMITATIONS.md) · [Contributing](CONTRIBUTING.md)
 
-> **Accuracy and privacy:** This is an offline-first **local demonstration**, not a remotely authenticated learning management system or a validated learning-risk prediction product. Example learners are fictional. Mastery values are heuristic state estimates, not probabilities of passing an exam. Socratic prompts are deterministic templates, not an autonomous LLM.
+<img src="docs/images/insights-desktop.png" alt="SkillGraph Insights view: rule-based insights, learner by skill mastery heat map, average mastery by skill with 4-week change, and a growth trajectory with practice and no-practice scenarios" width="100%">
 
-## Start in under two minutes
+</div>
 
-Install Python 3.11+ and run from the repository root:
+## Why SkillGraph
 
-~~~bash
-python -m pip install -e ".[dev]"
+Instructors and technical trainers need answers to practical questions: *Which skills has this cohort actually demonstrated? Who has practice due? Where is the bottleneck, and which prerequisite is behind it? What happens if practice stops?*
+
+SkillGraph answers them from a transparent mastery model, without accounts, cloud services, API keys, or telemetry. Every number on screen traces back to a documented rule, and missing observations stay missing instead of being counted as zero.
+
+## Quick start
+
+Requires Python 3.11 or newer.
+
+```bash
+git clone https://github.com/ali-kin4/skillgraph-tutor.git
+cd skillgraph-tutor
+python -m pip install -e .
 skillgraph dashboard --demo
-~~~
+```
 
-Open **http://127.0.0.1:8765**.
+Open **http://127.0.0.1:8765**. The `--demo` flag creates a reproducible synthetic cohort (16 fictional learners, 3 groups, 9 applied-Python concepts, 12 weeks of history) in `workspace/insights-demo`. Changes you record there persist between runs.
 
-The first run initializes a reusable, isolated **synthetic** workspace in `workspace/insights-demo`. Subsequent runs keep the learner changes you made in that local demonstration.
+To open your own workspace instead:
 
-A different local workspace can be opened without synthetic seeding:
-
-~~~bash
+```bash
+skillgraph init data/sample_syllabus.md      # build graph.json from a Markdown syllabus
+skillgraph add-student s1 --name "Ada"
 skillgraph dashboard --workspace workspace
-~~~
+```
 
-The workspace must already have `graph.json` and any learner state files under `students/`. Initialize with the existing CLI first.
+Every view is deep-linkable, for example `http://127.0.0.1:8765/#insights`.
 
-Choose a port or alternate workspace if needed:
+## Features
 
-~~~bash
-skillgraph dashboard --demo --workspace workspace/my-demo --port 8766
-~~~
+### Insights
 
-**The server binds to 127.0.0.1 only** and intentionally provides no authentication. Do not proxy or expose it to the internet without implementing a proper authentication, authorization, and security architecture.
+The view in the screenshot above, scoped to the whole cohort, one learning group, or a single learner:
 
-### Dashboard experiences
+- **Mastery heat map:** learners × skills on a five-band sequential scale; hatched cells are concepts not yet observed. Sort by name or mastery, toggle cell values, and select any cell to open that learner.
+- **Average mastery by skill:** observed mean per skill with the 4-week change in points.
+- **Growth trajectory:** 12 weeks of recorded history, then two model scenarios over a 4, 8 or 12-week horizon: *with weekly practice* and *without practice*. Includes a crosshair you can drive with the arrow keys, plus a data-table view.
+- **Insights:** deterministic rules covering the fastest-growing skills, the biggest bottleneck and its weakest prerequisite, the scenario gap, and due reviews. Select a highlighted skill to focus both charts on it.
 
-| Experience | What it actually does |
+### Instructor workspace
+
+| Overview | Learner explorer |
 | --- | --- |
-| Instructor overview | Cohort size, observed mastery, explicit scheduled reviews, support categories, concept bottlenecks |
-| Learner explorer | Search/filter by group or support; inspect learner mastery and honest missingness |
-| Interactive knowledge graph | SVG prerequisite network colored by cohort or selected learner's observed mastery |
-| Review center | Due practice queue based on actual scheduled due dates |
-| Cohort reporting | Per-group summaries and safe CSV/JSON exports |
-| Socratic practice | Offline deterministic hints, questions, and micro-actions |
-| Record a practice result | An instructor-selected correct/incorrect observation updates the original mastery model and SM-2 schedule |
-| Methodology | Every important calculation and limitation documented in the interface |
+| <img src="docs/images/overview-desktop.png" alt="Overview with KPIs, mastery by concept, support distribution, bottlenecks and learners to review" width="100%"> | <img src="docs/images/learners-desktop.png" alt="Searchable learner table with group, mastery estimate, observations, due reviews and support band" width="100%"> |
+| Cohort KPIs, mastery by concept, support distribution, bottlenecks and the learners to review next. | Search and filter by group or support band, then drill into any learner's concepts and recommendation. |
 
-The dashboard uses a dependency-free, responsive web interface. It works locally without accounts, a cloud API key, external fonts, or telemetry.
+| Knowledge graph | Review center |
+| --- | --- |
+| <img src="docs/images/knowledge-graph-desktop.png" alt="Interactive prerequisite graph shaded by observed mastery" width="100%"> | <img src="docs/images/review-center-desktop.png" alt="Queue of reviews due on or before today with suggested next steps" width="100%"> |
+| An interactive prerequisite network shaded by cohort or individual mastery. | Reviews whose scheduled date has passed. Concepts that were never scheduled are not treated as overdue. |
+
+Also included:
+
+- **Cohort reports:** per-group summaries and CSV/JSON exports, with spreadsheet formula injection neutralised.
+- **Socratic practice:** offline question, hint and next-step templates. Recording a correct or incorrect outcome with a confidence value updates the learner's mastery and their SM-2 review schedule.
+- **Methodology:** every calculation and limitation, documented inside the app.
+
+### Engine and CLI
+
+```bash
+skillgraph init data/sample_syllabus.md          # syllabus → concept graph
+skillgraph add-student s1 --name "Ada"
+skillgraph study s1 Variables                    # Socratic question and hint
+skillgraph quiz s1 Variables --correct --confidence 0.8
+skillgraph quiz s1 Variables --no-correct --confidence 0.6
+skillgraph review s1                             # due spaced-repetition items
+skillgraph plan s1 --horizon 7d                  # 7-day plan
+skillgraph report s1 --out reports/s1            # Markdown + JSON report
+skillgraph doctor                                # environment check
+skillgraph demo                                  # end-to-end scripted run
+```
+
+Engine defaults (seed, forgetting rate, SM-2 parameters, mastery thresholds) live in [`skillgraph.toml`](skillgraph.toml).
+
+## How the numbers work
+
+| Signal | Definition |
+| --- | --- |
+| **Mastery** | A 0–1 estimate per learner and concept. Each recorded outcome moves it by `learning_rate × confidence` (up if correct, down if not), after exponential forgetting `m · e^(−λ·days)` since the last update. It is a heuristic, not a calibrated probability. |
+| **Not observed** | A concept without a recorded state. It is excluded from every mean and shown separately. It is never treated as zero. |
+| **Due review** | A review whose explicitly scheduled SM-2 due date is on or before the snapshot time. |
+| **Support band** | *Needs support:* 3 or more due reviews, or any mastery below 0.40. *Monitor:* any due review, or 2 or more masteries below 0.60. *On track:* otherwise. *Unassessed:* nothing observed yet. This is a prioritisation rubric, not a risk prediction. |
+| **Growth history** | The weekly mean of every learner-concept pair's most recent recorded estimate. The final point equals the current snapshot mean. |
+| **Scenarios** | *With practice:* one successful review per observed concept each week at confidence 0.7, applied through each learner's own learning and forgetting rates. *Without practice:* forgetting only. These show what the model implies, not forecasts. |
+| **Insights** | Fixed rules over recorded data. No AI model generates them. |
+
+The full audit trail is in [docs/EVALUATION_AND_LIMITATIONS.md](docs/EVALUATION_AND_LIMITATIONS.md).
 
 ## Architecture
 
-~~~text
-                           local browser
-            ┌─────────────────────────────────┐
-            │ SkillGraph Insights UI           │
-            │ Overview • Roster • Knowledge    │
-            │ Graph • Review • Coaching        │
-            └────────────────┬────────────────┘
-                             │ same-origin /api
-                 ┌───────────▼───────────────┐
-                 │ Local Python HTTP server  │
-                 │ Bound to 127.0.0.1 only   │
-                 └───────────┬───────────────┘
-                             │
-                 ┌───────────▼────────────────┐
-                 │ SkillGraph existing engine │
-                 │ graph · student · scheduler│
-                 │ tutors · planner · reports │
-                 └───────────┬────────────────┘
-                             │
-                  local graph.json +
-                  students/*.json
-~~~
+```text
+ Browser (dependency-free HTML · CSS · ES modules · SVG)
+   │  same-origin JSON, strict CSP
+   ▼
+ dashboard_server.py   loopback-only HTTP, allowlisted assets, validated writes
+   │
+   ├── analytics.py    cohort snapshot, support bands, CSV export
+   ├── insights.py     history, scenario projections, growth, insight rules
+   │
+   ▼
+ Engine: graph · student (mastery + history) · scheduler (SM-2) · planner · tutors · reporting
+   │
+   ▼
+ Workspace files: graph.json · students/*.json · cohort_metadata.json
+```
 
-Core additions:
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/dashboard` | Cohort snapshot with methodology |
+| `GET /api/insights?scope=cohort\|group:<name>\|learner:<id>&weeks=1–26` | History, scenarios, growth and insights |
+| `GET /api/student?id=<id>` | One learner's state |
+| `GET /api/export.csv`, `/api/export.json` | Exports |
+| `POST /api/tutor` | Offline Socratic turn (read-only) |
+| `POST /api/attempt` | Record an outcome, update mastery and the SM-2 schedule |
 
-- `src/skillgraph_tutor/analytics.py`: deterministic cohort analytics, gaps, support categories, CSV export
-- `src/skillgraph_tutor/dashboard_server.py`: loopback server, static assets, explicit API routes
-- `src/skillgraph_tutor/demo_data.py`: deterministic fictional cohort generator
-- `src/skillgraph_tutor/web/`: real dashboard HTML, CSS, JavaScript, and vector graph
-- `tests/test_analytics.py` and `tests/test_dashboard_server.py`: numerical, API, privacy and export checks
-- `tests/browser-smoke.mjs`: real-browser learner, mastery and responsive flows
+Design details are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-See [architecture](docs/ARCHITECTURE.md) and [evaluation and limitations](docs/EVALUATION_AND_LIMITATIONS.md).
+## Security and privacy
 
-## How the measurements work
+- The server binds to `127.0.0.1` only and has **no authentication**. It is a single-user local tool. Do not expose it to a network.
+- Writes require JSON, a body under 8 KB, and a same-origin `Origin`. Learner IDs are validated and symlinked files are refused.
+- The Content Security Policy only allows scripts and styles from the app itself. The app makes no outbound requests and has no telemetry.
+- Use only fictional data or learner records you are authorised to process. The demo cohort is entirely synthetic.
 
-- **Mastery:** An original SkillGraph student state contains a value between 0 and 1 for each observed concept. Correct/incorrect observations move that value with a configurable learning-rate heuristic. Forgetting is applied when a new assessment updates the model; displaying the snapshot does not silently recalculate or persist decay.
-- **Unattempted:** A concept without a saved state is **not observed**, not zero mastery. It is excluded from means and visualized separately.
-- **Due:** Only previously scheduled reviews with a timestamp on or before the current UTC snapshot count as due. An untouched concept is not implicitly overdue.
-- **Support label:** A transparent action-priority heuristic, not a predicted dropout or exam-failure probability:
-  - *Needs support:* three or more due reviews, or an observed mastery below 0.40.
-  - *Monitor:* a due review or at least two observed concepts below 0.60.
-  - *On track:* neither rule applies.
-  - *Unassessed:* no observed concepts.
-- **Cohort mean:** Mean of **all observed learner × concept entries**, not a mean of unobserved concepts set to zero.
-- **Socratic tutoring:** Offline fixed prompts with scaffolding, not automated grading. A human reports practice correctness and confidence.
+See [SECURITY.md](SECURITY.md) for the security model and how to report a vulnerability.
 
-Use generated synthetic data only to demonstrate product capability—not to assert measured real-world training gains, clients, or commercial deployments.
+## Development
 
-## CLI — original engine preserved
+```bash
+python -m pip install -e ".[dev]"
+make check          # ruff lint + format check, pytest, CLI demo
+make cov            # tests with coverage
+make dashboard      # serve the demo cohort
+make screenshots    # regenerate docs/images with a local headless Chrome or Edge
+```
 
-~~~bash
-skillgraph init data/sample_syllabus.md
-skillgraph add-student s1 --name "Ada"
-skillgraph study s1 --concept Variables
-skillgraph quiz s1 --concept Variables --correct --confidence 0.8
-skillgraph review s1
-skillgraph plan s1 --horizon 7d
-skillgraph report s1 --out reports/s1
-skillgraph doctor
-~~~
+CI runs lint, a test matrix (Linux, Windows and macOS on Python 3.11–3.13), a wheel build that verifies the bundled assets, and a Playwright Chromium suite covering every view at desktop and 390px mobile widths. Contribution guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md), and release history is in [CHANGELOG.md](CHANGELOG.md).
 
-The CLI still supports offline concept graph construction, mastery states, SM-2 spaced repetition, Socratic prompt templates, planning and reports.
+```text
+src/skillgraph_tutor/
+  analytics.py  insights.py  dashboard_server.py  demo_data.py
+  graph.py  student.py  scheduler.py  planner.py  tutors.py  reporting.py  cli.py
+  web/  index.html  app.js  insights.js  styles.css
+tests/        pytest suite + browser-smoke.mjs
+scripts/      capture_screenshots.py
+docs/         ARCHITECTURE.md  EVALUATION_AND_LIMITATIONS.md  images/
+```
 
-## Quality gates and screenshots
+## Limitations
 
-~~~bash
-ruff check .
-ruff format --check .
-pytest -q
-make demo
-~~~
-
-Pull requests also run a **Chromium browser smoke test** covering the dashboard, learner filtering, interactive graph, due reviews, Socratic prompts, recorded practice, CSV export, and narrow mobile layouts.
-
-Browser-generated screenshots are uploaded to the [GitHub Actions workflow](https://github.com/ali-kin4/skillgraph-tutor/actions) as the `skillgraph-insights-screenshots` artifact. These are **real rendered captures**, not generated mockups.
-
-## Limitations and responsible usage
-
-This project has no multi-user permissions, audit database, proctoring, identity verification, bias evaluation, calibrated mastery model, or learner-risk validation. Running a local server on a workstation does not confer security to a public network deployment. Learner names and observations are personally sensitive in real use: use consent, access controls, and retention policies before working with real customer data. See the dedicated [evaluation and limitations guide](docs/EVALUATION_AND_LIMITATIONS.md).
+SkillGraph is not a hosted LMS. It has no multi-user permissions, audit log, identity verification, or calibrated psychometric model, and its scenarios and support bands have not been validated against real learning outcomes. Read [the evaluation guide](docs/EVALUATION_AND_LIMITATIONS.md) before using it with real learners.
 
 ## License
 
-Apache-2.0 · See [LICENSE](LICENSE). Original project contributors and code history preserved.
+[Apache-2.0](LICENSE) © [Ali Jabbary](https://alijabbary.com)
