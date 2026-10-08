@@ -201,5 +201,29 @@ def demo() -> None:
     typer.echo(f"Demo complete. Workspace: {ws}")
 
 
+
+@app.command("dashboard")
+def dashboard_cmd(
+    workspace: str = typer.Option("workspace/insights-demo", "--workspace"),
+    demo: bool = typer.Option(False, "--demo"),
+    port: int = typer.Option(8765, "--port"),
+) -> None:
+    """Open the local instructor and learner analytics dashboard."""
+    from .dashboard_server import run_dashboard
+    from .demo_data import create_demo_workspace
+
+    root = Path(workspace)
+    if demo:
+        try:
+            create_demo_workspace(root)
+        except (FileExistsError, OSError) as exc:
+            _fail(str(exc))
+    if not (root / "graph.json").exists():
+        _fail("Missing graph. Use --demo or initialize a workspace with skillgraph init.")
+    try:
+        run_dashboard(root, port)
+    except (OSError, ValueError) as exc:
+        _fail(str(exc))
+
 if __name__ == "__main__":
     app()
