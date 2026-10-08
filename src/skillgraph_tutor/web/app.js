@@ -64,7 +64,7 @@ function switchView(view) {
   if(view==="map")renderGraph();
   if(view==="reviews")renderReviews();
   if(view==="reports")renderReports();
-  window.scrollTo({top:0,behavior:"instant"});
+  window.scrollTo(0,0);
 }
 function closeDrawer() {
   $("#sidebar").classList.remove("open");
