@@ -117,6 +117,17 @@ def make_handler(workspace: Path):
             self._error(HTTPStatus.NOT_FOUND, "Unknown endpoint.")
 
         def _request_data(self) -> dict | None:
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                length = 0
+            if length <= 0 or length > 8192:
+                self.close_connection = True
+                self._error(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, "Invalid request size.")
+                return None
+            # Read the bounded body before any rejection so clients receive the
+            # error response instead of a connection reset (notably on Windows).
+            body = self.rfile.read(length)
             origin = self.headers.get("Origin")
             if origin:
                 local = urlsplit(origin)
@@ -128,14 +139,7 @@ def make_handler(workspace: Path):
                 self._error(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Expected application/json.")
                 return None
             try:
-                length = int(self.headers.get("Content-Length", "0"))
-            except ValueError:
-                length = 0
-            if length <= 0 or length > 8192:
-                self._error(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, "Invalid request size.")
-                return None
-            try:
-                payload = json.loads(self.rfile.read(length))
+                payload = json.loads(body)
             except (UnicodeDecodeError, json.JSONDecodeError):
                 self._error(HTTPStatus.BAD_REQUEST, "Invalid JSON body.")
                 return None

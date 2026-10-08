@@ -34,10 +34,7 @@ def create_demo_workspace(root: str | Path, now: datetime | None = None) -> Path
     """Populate an isolated workspace without overwriting existing learner records."""
     root = Path(root)
     now = now or datetime.now(timezone.utc)
-    source = Path(__file__).parents[2] / "demo" / "corporate_python_syllabus.md"
-    if not source.is_file():
-        # Wheel installs include the built-in syllabus under package data.
-        source = Path(__file__).with_name("demo_syllabus.md")
+    source = Path(__file__).with_name("demo_syllabus.md")
     graph = parse_syllabus_markdown(source.read_text(encoding="utf-8"))
     graph_path = root / "graph.json"
     student_dir = root / "students"
