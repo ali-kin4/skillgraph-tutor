@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Changed
+
+- Default forgetting rate lowered from 0.02 to 0.008 per day (half-life about 87 days instead of 35), so idle mastery and the "without practice" scenario decay more gently. Existing learner files keep the rate they were saved with.
+
 ## [0.2.0] - 2026-10-08
 
 ### Added

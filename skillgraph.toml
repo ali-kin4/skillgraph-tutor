@@ -6,7 +6,7 @@ provider = "mock"
 model_name = "mock-socratic-v1"
 
 [forgetting]
-lambda_default = 0.02
+lambda_default = 0.008
 
 [spaced_repetition]
 initial_interval_days = 1

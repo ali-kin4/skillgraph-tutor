@@ -35,7 +35,7 @@ class ConceptState:
 class StudentState:
     student_id: str
     name: str
-    forgetting_lambda: float = 0.02
+    forgetting_lambda: float = 0.008
     mastery_learning_rate: float = 0.18
     concepts: dict[str, ConceptState] = field(default_factory=dict)
 

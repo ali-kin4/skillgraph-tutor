@@ -16,7 +16,7 @@ class ModelConfig(BaseModel):
 
 
 class ForgettingConfig(BaseModel):
-    lambda_default: float = 0.02
+    lambda_default: float = 0.008
 
 
 class SpacedRepetitionConfig(BaseModel):
