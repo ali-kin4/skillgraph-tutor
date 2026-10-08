@@ -119,8 +119,8 @@ def make_handler(workspace: Path):
             origin = self.headers.get("Origin")
             if origin:
                 local = urlsplit(origin)
-                host = (self.headers.get("Host") or "").split(":")[0]
-                if local.scheme != "http" or local.hostname != host:
+                host = self.headers.get("Host") or ""
+                if local.scheme != "http" or local.netloc != host:
                     self._error(HTTPStatus.FORBIDDEN, "Cross-origin changes are not allowed.")
                     return None
             if self.headers.get_content_type() != "application/json":
