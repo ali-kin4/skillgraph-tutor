@@ -88,14 +88,14 @@ def study(student_id: str, concept: str, config_path: str | None = None) -> None
     student.concept(concept)
     save_student(_student_path(cfg, student_id), student)
     typer.echo(turn.question)
-    typer.echo(f"Hint: {turn.hint}")
+    typer.echo(turn.hint)
 
 
 @app.command("quiz")
 def quiz(
     student_id: str,
     concept: str,
-    correct: bool = typer.Option(..., "--correct"),
+    correct: bool = typer.Option(..., "--correct/--no-correct"),
     confidence: float = typer.Option(0.7, "--confidence"),
     config_path: str | None = None,
 ) -> None:
