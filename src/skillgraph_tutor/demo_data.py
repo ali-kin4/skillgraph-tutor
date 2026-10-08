@@ -60,13 +60,23 @@ def create_demo_workspace(root: str | Path, now: datetime | None = None) -> Path
         group_map[student_id] = group
         completed = len(concepts) - ((i * 3 + 1) % 5)
         for j, topic in enumerate(concepts[:completed]):
-            value = min(0.97, max(0.18, 0.81 - i * 0.024 - j * 0.028 + rng.uniform(-0.14, 0.14)))
+            # Distinct simulated learner bands illustrate action prioritization.
+            if i < 5:
+                base, decline, jitter = 0.88, 0.018, 0.035
+                due_offset = 3 + (i + j) % 7
+            elif i < 10:
+                base, decline, jitter = 0.74, 0.022, 0.045
+                due_offset = -1 if j == 0 or (i % 2 == 0 and j == 1) else 2 + (i + j) % 9
+            else:
+                base, decline, jitter = 0.60, 0.032, 0.04
+                due_offset = -(1 + j % 5) if j < 4 else 3 + (i + j) % 7
+            value = min(0.97, max(0.18, base - j * decline + rng.uniform(-jitter, jitter)))
             state = student.concept(topic)
             state.mastery = round(value, 4)
             state.updated_at = (now - timedelta(days=(i + j) % 13)).isoformat()
             state.reviews.repetitions = 1 + (i + j) % 4
             state.reviews.interval_days = 3 + (i + j) % 7
-            state.reviews.due_at = (now + timedelta(days=((i + j * 2) % 12) - 7)).isoformat()
+            state.reviews.due_at = (now + timedelta(days=due_offset)).isoformat()
         save_student(student_dir / (student_id + ".json"), student)
     (root / "cohort_metadata.json").write_text(
         json.dumps(
