@@ -201,7 +201,7 @@ def dashboard_snapshot(
         "sample": bool(metadata.get("synthetic", False)),
         "datasetLabel": str(metadata.get("label", "Local learning workspace")),
         "methodology": {
-            "mastery": "SkillGraph heuristic mastery estimates (0–1), not calibrated probabilities.",
+            "mastery": "Heuristic mastery estimates (0–1), not calibrated probabilities.",
             "due": "Only explicitly scheduled reviews with dueAt <= snapshot time count as due.",
             "support": "Needs support: 3+ due reviews or any observed mastery < 0.40; "
             "Monitor: any due review or 2+ observed masteries < 0.60; "
