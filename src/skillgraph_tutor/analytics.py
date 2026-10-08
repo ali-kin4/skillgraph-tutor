@@ -53,9 +53,7 @@ def load_cohort(workspace: str | Path) -> tuple[ConceptGraph, list[StudentState]
     return graph, students, metadata
 
 
-def _student_details(
-    graph: ConceptGraph, student: StudentState, now: datetime, group: str
-) -> dict:
+def _student_details(graph: ConceptGraph, student: StudentState, now: datetime, group: str) -> dict:
     names = list(graph.nodes)
     values = [
         student.concepts[name].mastery
@@ -154,8 +152,12 @@ def dashboard_snapshot(
     names = list(graph.nodes)
     concepts = []
     for name in names:
-        seen = [row["concepts"][i]["mastery"] for row in rows for i, node in enumerate(names)
-                if node == name and row["concepts"][i]["mastery"] is not None]
+        seen = [
+            row["concepts"][i]["mastery"]
+            for row in rows
+            for i, node in enumerate(names)
+            if node == name and row["concepts"][i]["mastery"] is not None
+        ]
         weak = sum(value < 0.6 for value in seen)
         concepts.append(
             {
@@ -169,8 +171,7 @@ def dashboard_snapshot(
             }
         )
 
-    observed = [c["mastery"] for row in rows for c in row["concepts"]
-                if c["mastery"] is not None]
+    observed = [c["mastery"] for row in rows for c in row["concepts"] if c["mastery"] is not None]
     due = sum(row["dueCount"] for row in rows)
     supports = {
         category: sum(row["support"] == category for row in rows)
@@ -180,8 +181,7 @@ def dashboard_snapshot(
     for group in sorted({row["group"] for row in rows}):
         subset = [row for row in rows if row["group"] == group]
         group_values = [
-            c["mastery"] for row in subset for c in row["concepts"]
-            if c["mastery"] is not None
+            c["mastery"] for row in subset for c in row["concepts"] if c["mastery"] is not None
         ]
         groups.append(
             {
@@ -238,8 +238,17 @@ def cohort_csv(snapshot: dict) -> str:
     output = io.StringIO(newline="")
     writer = csv.writer(output)
     writer.writerow(
-        ["Learner ID", "Learner", "Group", "Concept", "Mastery estimate",
-         "Status", "Review due (UTC)", "Support band", "Data source"]
+        [
+            "Learner ID",
+            "Learner",
+            "Group",
+            "Concept",
+            "Mastery estimate",
+            "Status",
+            "Review due (UTC)",
+            "Support band",
+            "Data source",
+        ]
     )
     label = "Synthetic demonstration" if snapshot["sample"] else "Local workspace"
     for student in snapshot["students"]:

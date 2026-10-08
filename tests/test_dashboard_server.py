@@ -84,8 +84,12 @@ def test_rejects_bad_student_path_and_invalid_confidence(local_dashboard):
         fetch_json(
             local_dashboard,
             "/api/attempt",
-            {"studentId": "learner-01", "concept": "Python Essentials",
-             "correct": True, "confidence": 10},
+            {
+                "studentId": "learner-01",
+                "concept": "Python Essentials",
+                "correct": True,
+                "confidence": 10,
+            },
         )
     assert error.value.code == 400
 
@@ -95,8 +99,12 @@ def test_rejects_cross_origin_write(local_dashboard):
         fetch_json(
             local_dashboard,
             "/api/attempt",
-            {"studentId": "learner-01", "concept": "Python Essentials",
-             "correct": False, "confidence": 0.7},
+            {
+                "studentId": "learner-01",
+                "concept": "Python Essentials",
+                "correct": False,
+                "confidence": 0.7,
+            },
             headers={"Origin": "https://untrusted.example"},
         )
     assert error.value.code == 403

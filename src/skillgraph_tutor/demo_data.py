@@ -66,9 +66,7 @@ def create_demo_workspace(root: str | Path, now: datetime | None = None) -> Path
             state.updated_at = (now - timedelta(days=(i + j) % 13)).isoformat()
             state.reviews.repetitions = 1 + (i + j) % 4
             state.reviews.interval_days = 3 + (i + j) % 7
-            state.reviews.due_at = (
-                now + timedelta(days=((i + j * 2) % 12) - 7)
-            ).isoformat()
+            state.reviews.due_at = (now + timedelta(days=((i + j * 2) % 12) - 7)).isoformat()
         save_student(student_dir / (student_id + ".json"), student)
     (root / "cohort_metadata.json").write_text(
         json.dumps(

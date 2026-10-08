@@ -201,7 +201,6 @@ def demo() -> None:
     typer.echo(f"Demo complete. Workspace: {ws}")
 
 
-
 @app.command("dashboard")
 def dashboard_cmd(
     workspace: str = typer.Option("workspace/insights-demo", "--workspace"),
@@ -224,6 +223,7 @@ def dashboard_cmd(
         run_dashboard(root, port)
     except (OSError, ValueError) as exc:
         _fail(str(exc))
+
 
 if __name__ == "__main__":
     app()

@@ -107,9 +107,7 @@ def make_handler(workspace: Path):
                 except (OSError, ValueError, KeyError, TypeError):
                     self._error(HTTPStatus.INTERNAL_SERVER_ERROR, "Unable to read cohort data.")
                     return
-                student = next(
-                    (s for s in snapshot["students"] if s["id"] == student_id), None
-                )
+                student = next((s for s in snapshot["students"] if s["id"] == student_id), None)
                 if student is None:
                     self._error(HTTPStatus.NOT_FOUND, "Learner not found.")
                 else:

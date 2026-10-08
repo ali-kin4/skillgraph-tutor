@@ -16,7 +16,6 @@ from skillgraph_tutor.demo_data import NAMES, create_demo_workspace
 from skillgraph_tutor.graph import parse_syllabus_markdown
 from skillgraph_tutor.student import StudentState
 
-
 NOW = datetime(2026, 10, 8, 12, tzinfo=timezone.utc)
 
 
