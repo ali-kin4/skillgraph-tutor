@@ -41,6 +41,11 @@ def create_demo_workspace(root: str | Path, now: datetime | None = None) -> Path
     graph = parse_syllabus_markdown(source.read_text(encoding="utf-8"))
     graph_path = root / "graph.json"
     student_dir = root / "students"
+    existing_metadata = root / "cohort_metadata.json"
+    if graph_path.exists() and existing_metadata.is_file():
+        existing = json.loads(existing_metadata.read_text(encoding="utf-8"))
+        if existing.get("synthetic") is True:
+            return root
     if graph_path.exists() or (student_dir.exists() and any(student_dir.iterdir())):
         raise FileExistsError(
             "Demo target already contains data. Choose a new --workspace to avoid overwriting."
