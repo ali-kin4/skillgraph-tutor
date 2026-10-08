@@ -52,6 +52,7 @@ def make_handler(workspace: Path):
             self.send_header(
                 "Content-Security-Policy",
                 "default-src 'self'; script-src 'self'; style-src 'self'; "
+                "style-src-elem 'self'; style-src-attr 'unsafe-inline'; "
                 "img-src 'self' data:; object-src 'none'; base-uri 'none'; "
                 "form-action 'self'; frame-ancestors 'none'",
             )
