@@ -57,6 +57,9 @@ def test_snapshot_coverage_due_and_missingness(tmp_path):
     assert metrics["dueReviews"] > 0
     assert len(result["groups"]) == 3
     assert sum(v for v in metrics["supportBands"].values()) == 16
+    assert metrics["supportBands"]["On track"] >= 3
+    assert metrics["supportBands"]["Monitor"] >= 3
+    assert metrics["supportBands"]["Needs support"] >= 3
     assert any(c["mastery"] is None for row in result["students"] for c in row["concepts"])
     assert sum(row["dueCount"] for row in result["students"]) == metrics["dueReviews"]
 
