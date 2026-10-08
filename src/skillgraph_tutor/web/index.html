@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101d38">
+  <meta name="description" content="SkillGraph Insights — offline-first, explainable learning analytics and adaptive practice for instructors and learners.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <title>SkillGraph Insights — Learning Analytics</title>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div id="layout" class="layout">
+  <div id="drawerShade" class="drawer-shade" hidden></div>
+  <aside id="sidebar" class="sidebar" aria-label="Primary navigation">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 44 44" fill="none"><rect width="44" height="44" rx="14" fill="#7B6BFA"/><path d="M12 27L21 16L32 21L26 32L12 27Z" stroke="white" stroke-width="2.3" stroke-linejoin="round"/><circle cx="12" cy="27" r="3" fill="#9BF4DB"/><circle cx="21" cy="16" r="3" fill="#fff"/><circle cx="32" cy="21" r="3" fill="#fff"/><circle cx="26" cy="32" r="3" fill="#9BF4DB"/></svg>
+      </span>
+      <span><strong>skillgraph<span class="accent">.</span></strong><small>INSIGHTS PLATFORM</small></span>
+    </div>
+    <div class="side-kicker">WORKSPACE</div>
+    <nav id="mainNav" class="nav-stack" aria-label="Dashboard sections">
+      <button type="button" class="nav-item active" data-view="overview"><span class="nav-icon">◫</span> Overview</button>
+      <button type="button" class="nav-item" data-view="learners"><span class="nav-icon">♙</span> Learners <span id="navLearners" class="nav-count">—</span></button>
+      <button type="button" class="nav-item" data-view="map"><span class="nav-icon">⌘</span> Knowledge graph</button>
+      <button type="button" class="nav-item" data-view="reviews"><span class="nav-icon">◷</span> Review center</button>
+      <button type="button" class="nav-item" data-view="reports"><span class="nav-icon">▤</span> Cohort reports</button>
+    </nav>
+    <div class="side-kicker side-kicker-2">LEARNING TOOLS</div>
+    <nav class="nav-stack">
+      <button type="button" class="nav-item" data-view="coach"><span class="nav-icon">✳</span> Socratic practice</button>
+      <button type="button" class="nav-item" data-view="method"><span class="nav-icon">◈</span> Methodology</button>
+    </nav>
+    <div class="side-spacer"></div>
+    <div class="side-widget">
+      <span class="side-widget-icon">✧</span>
+      <strong>Every learner has a path.</strong>
+      <p>Make progress visible. Find gaps early. Teach with intention.</p>
+      <div class="side-widget-footer">BUILT FOR BETTER LEARNING <span>↗</span></div>
+    </div>
+    <div class="side-footer">
+      <div class="avatar">AJ</div>
+      <span><strong>Ali Jabbary</strong><small>Platform creator</small></span>
+      <a href="https://alijabbary.com" target="_blank" rel="noreferrer noopener" aria-label="Open creator website">↗</a>
+    </div>
+  </aside>
+  <div class="main-wrap">
+    <header class="topbar">
+      <div class="crumb-wrap"><button class="mobile-menu" type="button" id="menuButton" aria-controls="sidebar" aria-expanded="false" aria-label="Open navigation">☰</button><span class="crumb">WORKSPACE</span><span class="slash">/</span><strong id="breadcrumb">Overview</strong></div>
+      <div class="top-actions">
+        <span class="offline-pill"><span class="online-dot"></span> LOCAL & PRIVATE</span>
+        <button type="button" class="top-export" id="topExport">↓ <span>Export data</span></button>
+        <span class="top-avatar">SG</span>
+      </div>
+    </header>
+    <main id="main" tabindex="-1">
+      <div id="fatalError" role="alert" class="error-banner" hidden></div>
+      <section id="view-overview" class="view active" aria-labelledby="overviewTitle">
+        <div class="page-lead">
+          <div><p class="eyebrow">INSTRUCTOR INTELLIGENCE HUB</p><h1 id="overviewTitle">Learning, made visible <span class="sparkle">✳</span></h1><p class="subtle">Real-time snapshots of mastery, practice, and the next best teaching intervention.</p></div>
+          <div class="date-chip" id="dateChip"></div>
+        </div>
+        <section class="hero">
+          <div class="hero-text">
+            <div class="hero-tag"><span>✦</span> INTELLIGENCE FOR EDUCATORS</div>
+            <h2>See the whole picture.<br><em>Support every learner.</em></h2>
+            <p>Concept-level insight, transparent mastery estimates, and review planning—brought together in one intuitive workspace.</p>
+            <button class="button button-white" type="button" data-goto="learners">Explore your learners <span>↗</span></button>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="hero-node hn-a"><span>✓</span><small>FOUNDATIONS</small></div><div class="hero-node hn-b"><span>◈</span><small>MASTERY</small></div><div class="hero-node hn-c"><span>↗</span><small>GROWTH</small></div>
+            <svg viewBox="0 0 390 270"><path d="M72 130L204 57L315 143L209 220L72 130L315 143" stroke="#D6CDFF" stroke-opacity=".5" stroke-width="2" fill="none" stroke-dasharray="4 7"/><circle cx="197" cy="135" r="53" fill="#FFFFFF" fill-opacity=".1" stroke="#D9C8FF" stroke-opacity=".36"/><circle cx="197" cy="135" r="35" fill="#fff" fill-opacity=".15"/><path d="M175 138L191 120L215 134L205 155L175 138Z" stroke="#A6F1DC" stroke-width="4" fill="none"/><circle cx="175" cy="138" r="6" fill="#fff"/><circle cx="191" cy="120" r="6" fill="#BAFFF0"/><circle cx="215" cy="134" r="6" fill="#fff"/><circle cx="205" cy="155" r="6" fill="#BAFFF0"/></svg>
+          </div>
+        </section>
+        <div class="section-head"><div><p class="eyebrow">AT A GLANCE</p><h2>Cohort overview</h2></div><span id="dataLabel" class="demo-pill">DATA LOADING</span></div>
+        <div id="kpiGrid" class="kpi-grid" aria-live="polite"></div>
+        <div class="overview-grid">
+          <section class="panel mastery-panel">
+            <div class="panel-heading"><div><p class="eyebrow">KNOWLEDGE SIGNALS</p><h3>Mastery by concept</h3><p>Mean observed mastery · with assessment coverage</p></div><button type="button" class="micro-link" data-goto="map">Explore graph ↗</button></div>
+            <div id="masteryBars" class="mastery-bars"></div>
+            <div class="chart-footnote">Unassessed concepts are excluded from the mean. Estimates are heuristic, not calibrated probabilities.</div>
+          </section>
+          <section class="panel distribution-panel">
+            <div class="panel-heading"><div><p class="eyebrow">LEARNER SUPPORT</p><h3>Support distribution</h3><p>Explainable, rule-based signals</p></div></div>
+            <div class="donut-wrap"><div id="supportDonut" class="donut"><div class="donut-center"><strong id="donutCount">—</strong><span>learners</span></div></div></div>
+            <div id="supportLegend" class="legend-list"></div>
+            <button class="text-link link-under" type="button" data-goto="method">How are support labels calculated? ↗</button>
+          </section>
+        </div>
+        <div class="overview-grid overview-bottom">
+          <section class="panel attention-panel"><div class="panel-heading"><div><p class="eyebrow">WHERE TO FOCUS</p><h3>Concept bottlenecks</h3><p>Lowest observed mastery—coverage shown</p></div><button class="micro-link" type="button" data-goto="map">Full map ↗</button></div><div id="bottleneckList"></div></section>
+          <section class="panel learner-panel"><div class="panel-heading"><div><p class="eyebrow">PERSONALIZED SUPPORT</p><h3>Learners to review</h3><p>Suggested next steps, not predicted outcomes</p></div><button class="micro-link" type="button" data-goto="learners">All learners ↗</button></div><div id="priorityLearners"></div></section>
+        </div>
+      </section>
+
+      <section id="view-learners" class="view" aria-labelledby="learnersTitle">
+        <div class="page-lead"><div><p class="eyebrow">COHORT INTELLIGENCE</p><h1 id="learnersTitle">Every learner. Every next step.</h1><p class="subtle">Explore observed strengths, learning gaps, and explainable support suggestions.</p></div></div>
+        <div class="toolbar panel"><label class="search-box"><span>⌕</span><input id="learnerSearch" placeholder="Search by learner name or ID" autocomplete="off" aria-label="Search learners"></label><label class="filter-label">Group <select id="groupFilter"><option value="all">All groups</option></select></label><label class="filter-label">Support <select id="supportFilter"><option value="all">All levels</option><option>Needs support</option><option>Monitor</option><option>On track</option><option>Unassessed</option></select></label><span id="rosterCount" class="roster-count"></span></div>
+        <section class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>LEARNER</th><th>LEARNING GROUP</th><th>MASTERY ESTIMATE</th><th>OBSERVED</th><th>DUE</th><th>SUPPORT</th><th></th></tr></thead><tbody id="learnerRows"></tbody></table></div></section>
+        <section id="learnerDetail" class="detail-panel panel" hidden aria-live="polite"></section>
+      </section>
+
+      <section id="view-map" class="view" aria-labelledby="mapTitle">
+        <div class="page-lead"><div><p class="eyebrow">KNOWLEDGE ARCHITECTURE</p><h1 id="mapTitle">See how skills connect.</h1><p class="subtle">An interactive view of prerequisite relationships and observed cohort mastery.</p></div></div>
+        <div class="map-toolbar panel"><div class="view-toggle"><button type="button" class="chip active" id="mapCohort">Cohort view</button><button type="button" class="chip" id="mapLearner">Learner view</button></div><label class="filter-label">Learner <select id="graphLearnerSelect" disabled><option value="">Choose learner</option></select></label><div class="map-key"><span><i class="legend-dot strong"></i>Higher mastery</span><span><i class="legend-dot weak"></i>Lower mastery</span><span><i class="legend-dot unknown"></i>Not observed</span></div></div>
+        <div class="map-layout"><div class="panel graph-panel"><div class="graph-header"><p class="eyebrow">CONCEPT NETWORK</p><span id="graphCount"></span></div><div class="graph-scroll"><svg id="conceptGraph" role="img" aria-label="Interactive directed graph of curriculum concepts" viewBox="0 0 1000 670"></svg></div><p class="chart-footnote">Arrows show declared prerequisites. Node shading reflects observed mastery, not independent verification.</p></div><aside class="panel node-details" id="nodeDetails" aria-live="polite"></aside></div>
+      </section>
+
+      <section id="view-reviews" class="view" aria-labelledby="reviewsTitle">
+        <div class="page-lead"><div><p class="eyebrow">SPACED PRACTICE</p><h1 id="reviewsTitle">The review center.</h1><p class="subtle">Act on scheduled practice without confusing unassessed concepts with overdue work.</p></div></div>
+        <div id="reviewMetrics" class="review-stats"></div>
+        <section class="panel table-panel"><div class="panel-heading inside"><div><p class="eyebrow">DUE REVIEWS</p><h3>Intervention queue</h3><p>Explicit review dates on or before the snapshot time</p></div><label class="filter-label">Group <select id="reviewGroupFilter"><option value="all">All groups</option></select></label></div><div class="table-scroll"><table><thead><tr><th>LEARNER</th><th>SKILL</th><th>MASTERY</th><th>DUE DATE</th><th>SUGGESTED NEXT STEP</th><th></th></tr></thead><tbody id="reviewRows"></tbody></table></div></section>
+      </section>
+
+      <section id="view-reports" class="view" aria-labelledby="reportsTitle">
+        <div class="page-lead"><div><p class="eyebrow">INSTRUCTOR REPORTING</p><h1 id="reportsTitle">Progress you can explain.</h1><p class="subtle">Reproducible snapshots, transparent denominators, and exports ready for review.</p></div><div class="report-actions"><button type="button" class="button button-outline" id="exportJson">↓ Export JSON</button><button type="button" class="button button-primary" id="exportCsv">↓ Export CSV</button></div></div>
+        <section class="panel table-panel"><div class="panel-heading inside"><div><p class="eyebrow">GROUP COMPARISON</p><h3>Learning groups</h3><p>Observed mastery averages, missing observations left missing</p></div></div><div class="table-scroll"><table><thead><tr><th>GROUP</th><th>LEARNERS</th><th>OBSERVED MASTERY</th><th>REVIEWS DUE</th><th>NEED SUPPORT</th></tr></thead><tbody id="groupRows"></tbody></table></div></section>
+        <div class="report-cards"><article class="panel report-info"><span class="report-icon">◎</span><h3>Evidence, not guesses</h3><p>The export contains an observation for each learner-concept pair with explicit missing states. It can be audited or used for instructor planning, not claims of proven learning gains.</p></article><article class="panel report-info"><span class="report-icon">⇩</span><h3>Take the data with you</h3><p>Export to CSV for Excel or JSON for further analysis. CSV output neutralizes spreadsheet formula-like fields.</p></article><article class="panel report-info"><span class="report-icon">◇</span><h3>Local data by design</h3><p>Files remain in the configured workspace on this computer. There are no hosted accounts, client telemetry, or API subscriptions.</p></article></div>
+        <section class="panel snapshot-note"><h3>Reporting disclosure</h3><p id="reportDisclosure"></p></section>
+      </section>
+
+      <section id="view-coach" class="view" aria-labelledby="coachTitle">
+        <div class="page-lead"><div><p class="eyebrow">LEARNING INTERVENTIONS</p><h1 id="coachTitle">Practice with purpose.</h1><p class="subtle">Use structured questioning to explore a concept, then record a practice outcome transparently.</p></div></div>
+        <div class="coach-layout">
+          <section class="panel coach-panel"><div class="panel-heading"><div><p class="eyebrow">DETERMINISTIC SOCRATIC PROMPTS</p><h3>Guided practice</h3><p>Template-driven prompts, not autonomous AI grading</p></div><span class="pill neutral">OFFLINE</span></div>
+            <div class="form-grid"><label>Learner <select id="coachLearner"></select></label><label>Concept <select id="coachConcept"></select></label></div>
+            <div id="coachDialog" class="coach-dialog"><div class="coach-bubble assistant-bubble">Choose a learner and concept, then start a guided conversation.</div></div>
+            <label class="answer-label" for="coachAnswer">Your explanation or example</label><textarea id="coachAnswer" rows="3" maxlength="1500" placeholder="Explain the idea in your own words..."></textarea><div class="coach-actions"><button type="button" class="button button-outline" id="coachStart">Start fresh</button><button type="button" class="button button-primary" id="coachSend">Continue practice ↗</button></div>
+          </section>
+          <aside class="panel assessment-panel"><p class="eyebrow">INSTRUCTOR-RECORDED OUTCOME</p><h3>Log a practice check</h3><p class="muted-copy">A correct/incorrect outcome and confidence value update the original SkillGraph mastery estimate and SM-2 review schedule. This is instructor-reported evidence, not automatically assessed accuracy.</p>
+            <form id="assessmentForm"><label class="outcome-label">Observed result</label><div class="outcome-switch"><label><input type="radio" name="result" value="correct" checked> Correct</label><label><input type="radio" name="result" value="incorrect"> Needs review</label></div><label class="range-label" for="confidence">Confidence <strong id="confidenceValue">0.80</strong></label><input id="confidence" type="range" min="0" max="1" step="0.05" value="0.8"><button class="button button-primary full" type="submit">Record observation →</button></form>
+            <div id="assessmentFeedback" aria-live="polite"></div><div class="coach-caution">Practice updates only the selected local learner record. For fictional demo data, all changes remain synthetic.</div></aside>
+        </div>
+      </section>
+
+      <section id="view-method" class="view" aria-labelledby="methodTitle">
+        <div class="page-lead"><div><p class="eyebrow">TRANSPARENT ANALYTICS</p><h1 id="methodTitle">Understand the numbers.</h1><p class="subtle">Every chart and action should be traceable to a documented rule, observation, or prerequisite.</p></div></div>
+        <div id="methodCards" class="method-grid"></div>
+      </section>
+    </main>
+    <footer class="footer"><span>© <span id="year"></span> <a href="https://alijabbary.com" target="_blank" rel="noopener noreferrer">Ali Jabbary</a> · SkillGraph Insights</span><span>Offline-first learning intelligence <span class="footer-star">✳</span></span></footer>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<noscript><div class="noscript">Enable JavaScript to use the local SkillGraph Insights dashboard.</div></noscript>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

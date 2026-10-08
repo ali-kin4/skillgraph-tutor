@@ -1,0 +1,43 @@
+name: SkillGraph browser validation
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Python application
+        run: python -m pip install -e .[dev]
+      - name: Install Playwright
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start isolated synthetic dashboard
+        run: |
+          python -m skillgraph_tutor.cli dashboard --demo --workspace workspace/insights-demo --port 8765 > /tmp/skillgraph.log 2>&1 &
+          echo $! > /tmp/skillgraph.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8765/api/dashboard >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/skillgraph.log
+          exit 1
+      - name: Exercise desktop and mobile flows
+        run: node tests/browser-smoke.mjs
+      - name: Capture browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skillgraph-insights-screenshots
+          path: screenshots/
+          if-no-files-found: ignore
