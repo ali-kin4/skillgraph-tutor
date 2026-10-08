@@ -9,12 +9,14 @@ from __future__ import annotations
 import json
 import math
 import re
+from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 from .analytics import cohort_csv, dashboard_snapshot, load_cohort
+from .insights import build_insights, concept_growth, select_learners, trajectory
 from .scheduler import sm2_update
 from .student import load_student, save_student
 from .tutors import SocraticTutor
@@ -24,6 +26,7 @@ ASSETS = {
     "/": ("index.html", "text/html; charset=utf-8"),
     "/index.html": ("index.html", "text/html; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/insights.js": ("insights.js", "text/javascript; charset=utf-8"),
     "/styles.css": ("styles.css", "text/css; charset=utf-8"),
     "/favicon.svg": ("favicon.svg", "image/svg+xml"),
 }
@@ -69,6 +72,21 @@ def make_handler(workspace: Path):
             graph, students, metadata = load_cohort(workspace)
             return dashboard_snapshot(graph, students, metadata)
 
+        def _insights(self, scope: str, weeks: int) -> dict:
+            graph, students, metadata = load_cohort(workspace)
+            chosen = select_learners(students, metadata, scope)
+            now = datetime.now(timezone.utc)
+            snapshot = dashboard_snapshot(graph, chosen, metadata, now=now)
+            projection = trajectory(graph, chosen, now, weeks_ahead=weeks)
+            growth = concept_growth(graph, chosen, now)
+            return {
+                "scope": scope,
+                "learners": len(chosen),
+                "trajectory": projection,
+                "growth": growth,
+                "insights": build_insights(snapshot, growth, projection),
+            }
+
         def do_GET(self) -> None:
             parsed = urlsplit(self.path)
             path = parsed.path
@@ -96,6 +114,25 @@ def make_handler(workspace: Path):
                     self._json(HTTPStatus.OK, self._snapshot())
                 except (OSError, ValueError, KeyError, TypeError):
                     self._error(HTTPStatus.INTERNAL_SERVER_ERROR, "Export could not be generated.")
+                return
+            if path == "/api/insights":
+                query = parse_qs(parsed.query)
+                scope = (query.get("scope") or ["cohort"])[0]
+                try:
+                    weeks = int((query.get("weeks") or ["8"])[0])
+                except ValueError:
+                    weeks = 0
+                if len(scope) > 140 or not 1 <= weeks <= 26:
+                    self._error(HTTPStatus.BAD_REQUEST, "Invalid scope or horizon.")
+                    return
+                try:
+                    self._json(HTTPStatus.OK, self._insights(scope, weeks))
+                except LookupError as error:
+                    self._error(HTTPStatus.NOT_FOUND, str(error.args[0]))
+                except ValueError as error:
+                    self._error(HTTPStatus.BAD_REQUEST, str(error))
+                except (OSError, TypeError):
+                    self._error(HTTPStatus.INTERNAL_SERVER_ERROR, "Unable to read cohort data.")
                 return
             if path == "/api/student":
                 values = parse_qs(parsed.query).get("id", [])

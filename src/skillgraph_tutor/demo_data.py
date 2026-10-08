@@ -10,6 +10,8 @@ from pathlib import Path
 from .graph import parse_syllabus_markdown
 from .student import StudentState, save_student
 
+WEEK = timedelta(days=7)
+
 NAMES = [
     ("learner-01", "Amelia Chen", "Data & Analytics"),
     ("learner-02", "Noah Patel", "Data & Analytics"),
@@ -50,6 +52,8 @@ def create_demo_workspace(root: str | Path, now: datetime | None = None) -> Path
     student_dir.mkdir(parents=True, exist_ok=True)
     graph.save_json(graph_path)
     rng = random.Random(4206)
+    # Separate stream so adding history never changes the seeded mastery values.
+    history_rng = random.Random(9013)
     concepts = list(graph.nodes)
     group_map = {}
     for i, (student_id, name, group) in enumerate(NAMES):
@@ -74,6 +78,7 @@ def create_demo_workspace(root: str | Path, now: datetime | None = None) -> Path
             state.reviews.repetitions = 1 + (i + j) % 4
             state.reviews.interval_days = 3 + (i + j) % 7
             state.reviews.due_at = (now + timedelta(days=due_offset)).isoformat()
+            state.history = _simulated_history(history_rng, state.updated_at, state.mastery, j)
         save_student(student_dir / (student_id + ".json"), student)
     (root / "cohort_metadata.json").write_text(
         json.dumps(
@@ -88,3 +93,19 @@ def create_demo_workspace(root: str | Path, now: datetime | None = None) -> Path
         encoding="utf-8",
     )
     return root
+
+
+def _simulated_history(
+    rng: random.Random, updated_at: str, final: float, order: int
+) -> list[tuple[str, float]]:
+    """Weekly estimates rising to ``final``; later curriculum concepts start later."""
+    end = datetime.fromisoformat(updated_at)
+    weeks = max(2, 12 - order)
+    start = max(0.12, final - rng.uniform(0.2, 0.42))
+    points = []
+    for week in range(weeks, 0, -1):
+        progress = (weeks - week) / weeks
+        value = start + (final - start) * progress + rng.uniform(-0.02, 0.02)
+        points.append(((end - week * WEEK).isoformat(), round(min(0.97, max(0.1, value)), 4)))
+    points.append((updated_at, final))
+    return points

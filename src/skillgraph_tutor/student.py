@@ -6,6 +6,9 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Bound per-concept history so long-lived learner files stay small.
+HISTORY_LIMIT = 120
+
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
@@ -24,6 +27,8 @@ class ConceptState:
     mastery: float = 0.2
     updated_at: str = field(default_factory=lambda: utc_now().isoformat())
     reviews: ReviewState = field(default_factory=ReviewState)
+    # Chronological (timestamp, mastery) observations recorded after each update.
+    history: list[tuple[str, float]] = field(default_factory=list)
 
 
 @dataclass
@@ -58,6 +63,8 @@ class StudentState:
         signal = (1.0 if correct else -1.0) * max(0.0, min(1.0, confidence))
         c.mastery = float(max(0.0, min(1.0, c.mastery + self.mastery_learning_rate * signal)))
         c.updated_at = now.isoformat()
+        c.history.append((c.updated_at, round(c.mastery, 4)))
+        del c.history[:-HISTORY_LIMIT]
         return c.mastery
 
     def to_dict(self) -> dict:
@@ -71,6 +78,7 @@ class StudentState:
                     "mastery": state.mastery,
                     "updated_at": state.updated_at,
                     "reviews": asdict(state.reviews),
+                    "history": [list(point) for point in state.history],
                 }
                 for name, state in self.concepts.items()
             },
@@ -86,6 +94,7 @@ class StudentState:
                 mastery=raw.get("mastery", default_state.mastery),
                 updated_at=raw.get("updated_at", default_state.updated_at),
                 reviews=reviews,
+                history=[(str(at), float(value)) for at, value in raw.get("history", [])],
             )
         return cls(
             student_id=data["student_id"],
