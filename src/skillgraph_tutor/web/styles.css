@@ -21,3 +21,15 @@ main{width:min(1540px,100%);margin:0 auto;padding:38px clamp(22px,4%,52px) 56px;
 @media(max-width:760px){.layout{display:block}.sidebar{position:fixed;transform:translateX(-110%);visibility:hidden;transition:transform .22s,visibility .22s;top:0;left:0;width:273px;box-shadow:20px 0 50px #17244144;padding:24px 12px 0}.sidebar.open{transform:translateX(0);visibility:visible}.drawer-shade:not([hidden]){display:block;position:fixed;inset:0;background:#0a16309c;z-index:30}.mobile-menu{display:grid;place-items:center;border:1px solid #e8eaf1;background:white;color:#4d5c76;border-radius:8px;height:36px;width:36px;font-size:18px}.topbar{height:65px;padding:0 18px}.crumb-wrap,.top-actions{gap:9px}.crumb{font-size:9px}.offline-pill{font-size:9px}.top-export span{display:none}.top-export{padding:8px 10px}.top-avatar{display:none}main{padding:25px 17px 38px}.page-lead{align-items:flex-start}.page-lead h1{font-size:28px}.page-lead .date-chip{display:none}.hero{padding:29px;min-height:270px}.hero-text{width:100%}.hero-visual{display:none}.hero h2{font-size:31px}.hero p{max-width:460px}.overview-bottom{grid-template-columns:1fr}.report-cards,.method-grid{grid-template-columns:1fr}.detail-metrics{grid-template-columns:repeat(2,1fr)}.map-toolbar{gap:13px}.report-actions{flex-wrap:wrap}.footer{padding:20px}.graph-scroll svg{min-width:700px}}
 @media(max-width:455px){h1{font-size:27px}.page-lead{flex-direction:column}.subtle{font-size:12px}.hero h2{font-size:26px}.hero{min-height:258px}.kpi-grid{gap:10px}.kpi{padding:15px;min-height:122px}.kpi-value{font-size:22px}.kpi-label{font-size:10px}.mastery-row{grid-template-columns:98px minmax(0,1fr) 37px;gap:7px}.mastery-name{font-size:10px}.form-grid{grid-template-columns:1fr}.coach-panel,.assessment-panel{padding:18px}.review-stats{grid-template-columns:1fr}.report-actions{width:100%}.report-actions .button{flex:1}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+
+/* Release polish: keep header within narrow viewports and fit entire knowledge graph. */
+.bar-track{position:relative;display:block}
+.bar-fill{display:block;min-height:10px}
+.graph-scroll svg{min-width:0;min-height:0;width:100%;height:auto;aspect-ratio:1000/670}
+@media(max-width:455px){
+  .offline-pill{display:none}
+  .crumb-wrap,.top-actions{min-width:0}
+  .topbar{width:100%;min-width:0}
+  .footer{flex-wrap:wrap;row-gap:8px}
+  .hero-text{min-width:0}
+}
